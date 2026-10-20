@@ -1,4 +1,6 @@
+
 import 'package:flutter/material.dart';
+import '../theme.dart';
 
 class BottomNavigationBarWidget extends StatefulWidget {
   const BottomNavigationBarWidget({super.key});
@@ -23,19 +25,49 @@ class _BottomNavigationBarWidgetState
     return BottomNavigationBar(
       currentIndex: _selectedIndex,
       onTap: _onItemTapped,
-      backgroundColor: Color(0xFFF5F5F5),
-      selectedItemColor: Color(0xFFFFF185),
-      unselectedItemColor: Color(0xFF43302E),
 
-      items: const [
+      backgroundColor: Color(0xFFF5F5F5),
+      selectedItemColor: AppColors.textPrimary,
+      unselectedItemColor: AppColors.textSecondary,
+
+      type: BottomNavigationBarType.fixed,
+      showSelectedLabels: true,
+      showUnselectedLabels: true,
+
+      selectedLabelStyle: AppTextStyles.button.copyWith(
+        fontSize: 12,
+        fontWeight: FontWeight.w800,
+      ),
+      unselectedLabelStyle: AppTextStyles.subtitle.copyWith(
+        fontSize: 12,
+        fontWeight: FontWeight.w500,
+      ),
+
+      items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.book_outlined),
-          activeIcon: Icon(Icons.book),
+          icon: Icon(
+            Icons.menu_book_outlined,
+            size: 27,
+            weight: 600,
+          ),
+          activeIcon: Icon(
+            Icons.menu_book_rounded,
+            size: 29,
+            weight: 700,
+          ),
           label: 'Recipes',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.calendar_today_outlined),
-          activeIcon: Icon(Icons.calendar_today),
+          icon: Icon(
+            Icons.calendar_month_outlined,
+            size: 27,
+            weight: 600,
+          ),
+          activeIcon: Icon(
+            Icons.calendar_month_rounded,
+            size: 29,
+            weight: 700,
+          ),
           label: 'Planner',
         ),
       ],
