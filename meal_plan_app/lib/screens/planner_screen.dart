@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../widgets/bottom_navigation_bar_widget.dart';
 import '../data/recipe_data.dart';
 import '../theme.dart';
+import 'detail_screen.dart';
 
 class PlannedRecipe {
   final String recipeId;
@@ -76,6 +77,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
                   DropdownButtonFormField<String>(
                     value: selectedDay,
                     isExpanded: true,
+                    dropdownColor: AppColors.background,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: AppColors.background,
@@ -84,7 +86,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
                       ),
                     ),
                     items: days.map((day) {
-                      return DropdownMenuItem<String>(
+                      return DropdownMenuItem<String>( 
                         value: day,
                         child: Text(day),
                       );
@@ -133,7 +135,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Resep dipindahkan ke $newDay'),
+          content: Text('Move to $newDay'),
         ),
       );
     });
@@ -217,11 +219,23 @@ class _PlannerScreenState extends State<PlannerScreen> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(
+            builder: (context) => DetailScreen(
+              mealId: meal.id
+            ), 
+          ),
+        );
+      },
+
+      borderRadius: BorderRadius.circular(12),
+
       child: Row(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.network(
+            child: Image.asset(
               meal.image,
               width: 68,
               height: 68,
@@ -248,7 +262,6 @@ class _PlannerScreenState extends State<PlannerScreen> {
             ),
           ),
           PopupMenuButton<String>(
-            tooltip: 'Edit atau hapus resep',
             onSelected: (action) {
               if (action == 'edit') {
                 _editRecipe(plannedRecipe);
@@ -288,7 +301,9 @@ class _PlannerScreenState extends State<PlannerScreen> {
           ),
         ],
       ),
+      ),
     );
+
   }
 
   @override

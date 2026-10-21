@@ -126,7 +126,7 @@ class DetailScreen extends StatelessWidget {
               children: [
                 Stack(
                   children: [
-                    Image.network(
+                    Image.asset(
                       meal.image,
                       width: double.infinity,
                       height: 300,

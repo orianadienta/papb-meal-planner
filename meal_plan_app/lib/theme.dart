@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+// import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
   // Warna utama halaman
@@ -23,28 +23,32 @@ class AppColors {
 
 class AppTextStyles {
   // Judul halaman
-  static final heading = GoogleFonts.nunito(
+  static const TextStyle heading = TextStyle(
+    fontFamily: 'Nunito',
     fontSize: 25,
     fontWeight: FontWeight.w800,
     color: AppColors.textPrimary,
   );
 
   // Judul resep di card
-  static final cardTitle = GoogleFonts.nunito(
+  static const TextStyle cardTitle = TextStyle(
+    fontFamily: 'Nunito',
     fontSize: 16,
     fontWeight: FontWeight.w700,
     color: AppColors.textPrimary,
   );
 
   // Subjudul dan kategori
-  static final subtitle = GoogleFonts.dmSans(
+  static const TextStyle subtitle = TextStyle(
+    fontFamily: 'DMSans',
     fontSize: 15,
     fontWeight: FontWeight.w400,
     color: AppColors.textSecondary,
   );
 
   // Instruksi dan deskripsi resep
-  static final body = GoogleFonts.dmSans(
+  static const TextStyle body = TextStyle(
+    fontFamily: 'DMSans',
     fontSize: 15,
     fontWeight: FontWeight.w400,
     color: AppColors.textPrimary,
@@ -52,7 +56,8 @@ class AppTextStyles {
   );
 
   // Teks tombol
-  static final button = GoogleFonts.nunito(
+  static const TextStyle button = TextStyle(
+    fontFamily: 'Nunito',
     fontSize: 14,
     fontWeight: FontWeight.w700,
   );

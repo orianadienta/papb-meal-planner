@@ -36,7 +36,7 @@ const List<RecipeData> recipeDatas = [
       '1 sdm Kecap ikan',
     ],
     image:
-        'https://www.themealdb.com/images/media/meals/rlwcc51598734603.jpg',
+        'assets/images/papayasalad.jpg',
   ),
 
   RecipeData(
@@ -57,7 +57,7 @@ const List<RecipeData> recipeDatas = [
       '1 sdm Minyak goreng',
     ],
     image:
-        'https://www.themealdb.com/images/media/meals/wvpsxx1468256321.jpg',
+        'assets/images/teriyaki.jpg',
   ),
 
   RecipeData(
@@ -82,7 +82,7 @@ const List<RecipeData> recipeDatas = [
       'Secukupnya Lada',
     ],
     image:
-        'https://www.themealdb.com/images/media/meals/sutysw1468247559.jpg',
+        'assets/images/spaghetti.jpg',
   ),
 
   RecipeData(
@@ -104,6 +104,6 @@ const List<RecipeData> recipeDatas = [
       '1 sdt Baking powder',
     ],
     image:
-        'https://www.themealdb.com/images/media/meals/rwuyqx1511383174.jpg',
+        'assets/images/pancakes.jpg',
   ),
 ];

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'screens/home_screen.dart';
 import 'theme.dart';
 // import 'screens/detail_screen.dart';
@@ -25,7 +24,7 @@ class MyApp extends StatelessWidget {
 
       theme: ThemeData(
         scaffoldBackgroundColor: AppColors.background,
-        fontFamily: GoogleFonts.nunito().fontFamily,
+        fontFamily: 'Nunito',
         appBarTheme: const AppBarTheme(
           backgroundColor: AppColors.background,
           foregroundColor: AppColors.textPrimary,
