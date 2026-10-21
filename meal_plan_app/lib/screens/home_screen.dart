@@ -1,10 +1,9 @@
 
 import 'package:flutter/material.dart';
-import '../models/recipe_model.dart';
-import '../services/meal_api.dart';
 import '../widgets/bottom_navigation_bar_widget.dart';
 import 'detail_screen.dart';
 import '../theme.dart';
+import '../data/recipe_data.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -14,12 +13,20 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late Future<RecipeModel> futureRecipes;
+ final List<RecipeData> recipes = recipeDatas;
 
-  @override
-  void initState() {
-    super.initState();
-    futureRecipes = MealApi().fetchMealsByLetter('a');
+ String searchRecipe = '';
+
+ List<RecipeData> get filteredRecipes {
+    if (searchRecipe.trim().isEmpty) {
+      return recipes;
+    }
+
+    return recipes.where((recipe) {
+      return recipe.name
+          .toLowerCase()
+          .contains(searchRecipe.trim().toLowerCase());
+    }).toList();
   }
 
   @override
@@ -28,25 +35,19 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.background,
 
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        automaticallyImplyLeading: false,
+        title: 
             Text(
               'Meal Planner',
-              style: AppTextStyles.heading
+              style: AppTextStyles.heading.copyWith(
+                letterSpacing: 2,
+              )
+              
             ),
-            Text(
-              'Find Your Next Favorite Meal',
-              style: AppTextStyles.subtitle.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
+            backgroundColor: AppColors.primaryLight,
+          
         ),
-        backgroundColor: AppColors.primaryLight,
-        elevation: 0,
-      ),
-
+    
 
       body: Column(
         children: [
@@ -59,9 +60,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 Expanded(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _searchField(),
                       const SizedBox(height: 20),
+
+                      Column(
+                        children: [
+                          Text(
+                          'Find Your Next Favorite Meal',
+                          style: AppTextStyles.subtitle.copyWith(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18
+                            
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+                        ],
+                      ),
 
                       Expanded(
                         child: _recipeSection()
@@ -81,7 +98,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
-
   Widget _searchField() {
     return Container(
       margin: const EdgeInsets.only(top: 12),
@@ -96,21 +112,9 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: TextField(
         onChanged: (value) {
-          if (value.trim().isEmpty) {
-            setState(() {
-              // Kembali ke data awal
-              futureRecipes =
-                  MealApi().fetchMealsByLetter('a');
+          setState(() {
+              searchRecipe = value;
             });
-          }
-        },
-        onSubmitted: (value) {
-          if (value.isNotEmpty) {
-            setState(() {
-              futureRecipes =
-                  MealApi().fetchMealsBySearch(value);
-            });
-          }
         },
         
         style: AppTextStyles.body,
@@ -136,38 +140,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _recipeSection() {
-    return FutureBuilder<RecipeModel>(
-      future: futureRecipes,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
+    final meals = filteredRecipes;
 
-        if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              'Error: ${snapshot.error}',
-              style: AppTextStyles.body,
-            ),
-          );
-        }
+    if (meals.isEmpty) {
+      return Center(
+        child: Text(
+          'Recipe is not available',
+          style: AppTextStyles.body,
+        ),
+      );
+    }
 
-        if (!snapshot.hasData ||
-            snapshot.data!.meals == null ||
-            snapshot.data!.meals!.isEmpty) {
-          return Center(
-            child: Text(
-              'Recipe is not available',
-              style: AppTextStyles.body,
-            ),
-          );
-        }
-
-        final meals = snapshot.data!.meals!;
-
-        return SingleChildScrollView(
+    return SingleChildScrollView(
           child: Column(
             children: [
               for (int i = 0; i < meals.length; i += 2)
@@ -194,18 +178,16 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         );
-      },
-    );
   }
 
-  Widget _recipeCard({required Meals meal}) {
+  Widget _recipeCard({required  RecipeData meal}) {
     return InkWell(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => DetailScreen(
-              mealId: meal.idMeal!, // nanti buat detail
+              mealId: meal.id, 
             ),
           ),
         );
@@ -217,7 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Image.network(
-              meal.strMealThumb ?? '',
+              meal.image,
               height: 180,
               width: double.infinity,
               fit: BoxFit.cover,
@@ -231,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    meal.strMeal ?? '-',
+                    meal.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.cardTitle.copyWith(
@@ -242,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 4),
 
                   Text(
-                    meal.strCategory ?? '-',
+                    meal.category,
                     style: AppTextStyles.subtitle.copyWith(
                       fontSize: 12,
                     ),
