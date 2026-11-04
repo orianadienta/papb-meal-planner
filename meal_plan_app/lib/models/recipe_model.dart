@@ -190,6 +190,19 @@ class Meals {
     dateModified = json['dateModified'];
   }
 
+  List<String> get ingredients {      // <- taruh di sini
+    final json = toJson();
+    final result = <String>[];
+    for (var i = 1; i <= 20; i++) {
+      final ing = (json['strIngredient$i'] as String?)?.trim() ?? '';
+      final measure = (json['strMeasure$i'] as String?)?.trim() ?? '';
+      if (ing.isNotEmpty) {
+        result.add(measure.isEmpty ? ing : '$measure $ing');
+      }
+    }
+    return result;
+  }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['idMeal'] = this.idMeal;

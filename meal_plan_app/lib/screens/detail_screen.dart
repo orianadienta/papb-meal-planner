@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../controller/recipe_controller.dart';
+import '../models/recipe_model.dart';
 import '../widgets/bottom_navigation_bar_widget.dart';
 import '../widgets/planner_sheet.dart';
-import '../theme.dart';
-import '../data/recipe_data.dart';
-import '../screens/planner_screen.dart';
 import '../data/planner_data.dart';
+import '../screens/planner_screen.dart';
+import '../theme.dart';
 
-class DetailScreen extends StatelessWidget {
+class DetailScreen extends ConsumerWidget {
   final String mealId;
 
   const DetailScreen({
@@ -14,17 +16,7 @@ class DetailScreen extends StatelessWidget {
     required this.mealId,
   });
 
-  RecipeData get selectedRecipe {
-    for (final recipe in recipeDatas) {
-      if (recipe.id == mealId) {
-        return recipe;
-      }
-    }
-
-    return recipeDatas.first;
-  }
-
-  Future<void> _addToPlanner(BuildContext context, RecipeData meal) async {
+  Future<void> _addToPlanner(BuildContext context, Meals meal) async {
     final result = await PlannerSheet.show(
       context,
       title: 'Add to Planner',
@@ -35,7 +27,7 @@ class DetailScreen extends StatelessWidget {
 
     plannedRecipes.add(
       PlannedRecipe(
-        recipeId: meal.id,
+        recipeId: meal.idMeal ?? '',
         day: result.day,
         mealType: result.mealType,
       ),
@@ -53,9 +45,28 @@ class DetailScreen extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final meal = selectedRecipe;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final detail = ref.watch(mealDetailProvider(mealId));
 
+    return detail.when(
+      loading: () => Scaffold(
+        appBar: AppBar(),
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, _) => Scaffold(
+        appBar: AppBar(),
+        body: Center(child: Text('Error: $e')),
+      ),
+      data: (meal) => meal == null
+          ? Scaffold(
+              appBar: AppBar(),
+              body: const Center(child: Text('Recipe not found')),
+            )
+          : _buildDetail(context, meal),
+    );
+  }
+
+  Widget _buildDetail(BuildContext context, Meals meal) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Padding(
@@ -68,8 +79,8 @@ class DetailScreen extends StatelessWidget {
               children: [
                 Stack(
                   children: [
-                    Image.asset(
-                      meal.image,
+                    Image.network(
+                      meal.strMealThumb ?? '',
                       width: double.infinity,
                       height: 300,
                       fit: BoxFit.cover,
@@ -126,7 +137,7 @@ class DetailScreen extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Text(
-                                  meal.name,
+                                  meal.strMeal ?? '',
                                   style: AppTextStyles.cardTitle.copyWith(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
@@ -165,40 +176,11 @@ class DetailScreen extends StatelessWidget {
                             ],
                           ),
 
-                          // const SizedBox(height: 8),
-
-                          // Kategori resep
-                         
-                          // Container(  
-                          //   padding: const EdgeInsets.only(bottom: 16, top: 16),
-                          //   decoration: BoxDecoration(
-                          //     border: Border.symmetric(
-                          //       horizontal: BorderSide(
-                          //         color: Colors.grey,
-                          //         width: 1,
-                          //       ),
-                          //     ),
-                          //   ),
-                          //   child: Column(
-                          //     crossAxisAlignment: CrossAxisAlignment.start,
-                          //     children: [
-                          //       SizedBox(
-                          //         width: 350,
-                          //         // height: 20,
-                          //         child: Text(
-                          //           meal.category,
-                          //           style: AppTextStyles.subtitle,
-                          //         ),
-                          //       ),
-                          //     ],
-                          //   ),
-                          // ),
-
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                                Text(
-                                    meal.category,
+                                    meal.strCategory ?? '',
                                     style: AppTextStyles.subtitle,
                               ),
                               
@@ -209,8 +191,6 @@ class DetailScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-
-                          // const SizedBox(height: 18),
                           
 
                           // Ingredients
@@ -243,10 +223,6 @@ class DetailScreen extends StatelessWidget {
                             ],
                           ),
 
-                          
-
-                          // const SizedBox(height: 5),
-
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -261,7 +237,7 @@ class DetailScreen extends StatelessWidget {
                           const SizedBox(height: 12),
 
                           Text(
-                            meal.instructions,
+                            meal.strInstructions ?? '',
                             style: AppTextStyles.body.copyWith(
                               height: 1.5,
                             ),
