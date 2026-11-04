@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'screens/home_screen.dart';
 import 'theme.dart';
-import 'package:google_fonts/google_fonts.dart';
-// import 'screens/detail_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+  ]);
+  runApp(const ProviderScope(child:MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -19,9 +24,9 @@ class MyApp extends StatelessWidget {
 
       theme: ThemeData(
         scaffoldBackgroundColor: AppColors.background,
-        fontFamily: GoogleFonts.nunito().fontFamily,
+        fontFamily: 'Nunito',
         appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.primaryLight,
+          backgroundColor: AppColors.background,
           foregroundColor: AppColors.textPrimary,
           elevation: 0,
         ),

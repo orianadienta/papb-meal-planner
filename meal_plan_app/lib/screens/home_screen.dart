@@ -1,77 +1,89 @@
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../controller/recipe_controller.dart';
 import '../models/recipe_model.dart';
-import '../services/meal_api.dart';
 import '../widgets/bottom_navigation_bar_widget.dart';
 import 'detail_screen.dart';
 import '../theme.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class HomeScreen extends ConsumerWidget {
+  const HomeScreen({super.key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final meals = ref.watch(mealListProvider);
 
-class _HomeScreenState extends State<HomeScreen> {
-  late Future<RecipeModel> futureRecipes;
-
-  @override
-  void initState() {
-    super.initState();
-    futureRecipes = MealApi().fetchMealsByLetter('a');
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Meal Planner',
-              style: AppTextStyles.heading
-            ),
-            Text(
-              'Find Your Next Favorite Meal',
-              style: AppTextStyles.subtitle.copyWith(
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Meal Planner',
+          style: AppTextStyles.heading.copyWith(
+            letterSpacing: 2,
+            color: AppColors.background,
+          ),
         ),
-        backgroundColor: AppColors.primaryLight,
-        elevation: 0,
+        backgroundColor: AppColors.primary,
       ),
-
-
       body: Column(
         children: [
-          const SizedBox(height: 8),
-
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(25),
+                bottomRight: Radius.circular(25),
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(15, 4, 15, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Find Your Next Favorite Meal',
+                  style: AppTextStyles.subtitle.copyWith(
+                    color: AppColors.onPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                  ),
+                ),
+                _searchField(ref),
+              ],
+            ),
+          ),
           Expanded(
             child: Row(
               children: [
                 const SizedBox(width: 15),
-
                 Expanded(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _searchField(),
                       const SizedBox(height: 20),
-
+                      Column(
+                        children: [
+                          Text(
+                            'Explore',
+                            style: AppTextStyles.subtitle.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18,
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                        ],
+                      ),
                       Expanded(
-                        child: _recipeSection()
-                      )
+                        child: _recipeSection(context, meals),
+                      ),
                     ],
-                  )
+                  ),
                 ),
                 const SizedBox(width: 15),
               ],
-            )
+            ),
           ),
           const SizedBox(height: 8),
         ],
@@ -80,15 +92,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
-
-  Widget _searchField() {
+  Widget _searchField(WidgetRef ref) {
     return Container(
       margin: const EdgeInsets.only(top: 12),
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
+            color: Colors.black.withOpacity(0.25),
             spreadRadius: 2,
             blurRadius: 8,
           ),
@@ -97,37 +107,24 @@ class _HomeScreenState extends State<HomeScreen> {
       child: TextField(
         onChanged: (value) {
           if (value.trim().isEmpty) {
-            setState(() {
-              // Kembali ke data awal
-              futureRecipes =
-                  MealApi().fetchMealsByLetter('a');
-            });
+            ref.read(searchQueryProvider.notifier).set('');
           }
         },
-        onSubmitted: (value) {
-          if (value.isNotEmpty) {
-            setState(() {
-              futureRecipes =
-                  MealApi().fetchMealsBySearch(value);
-            });
-          }
-        },
-        
+        onSubmitted: (value) =>
+            ref.read(searchQueryProvider.notifier).set(value),
         style: AppTextStyles.body,
         decoration: InputDecoration(
           filled: true,
-          fillColor: const Color(0xFFF5F5F5),
+          fillColor: AppColors.surface,
           contentPadding: const EdgeInsets.all(15),
           hintText: 'Search recipes...',
-          hintStyle: AppTextStyles.subtitle.copyWith(
-            color: Colors.grey,
-          ),
+          hintStyle: AppTextStyles.subtitle,
           prefixIcon: const Icon(
             Icons.search,
-            color: Colors.grey,
+            color: AppColors.textSecondary,
           ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(20),
             borderSide: BorderSide.none,
           ),
         ),
@@ -135,57 +132,32 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _recipeSection() {
-    return FutureBuilder<RecipeModel>(
-      future: futureRecipes,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        if (snapshot.hasError) {
+  Widget _recipeSection(BuildContext context, AsyncValue<List<Meals>> meals) {
+    return meals.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(
+        child: Text('Error: $e', style: AppTextStyles.body),
+      ),
+      data: (list) {
+        if (list.isEmpty) {
           return Center(
-            child: Text(
-              'Error: ${snapshot.error}',
-              style: AppTextStyles.body,
-            ),
+            child: Text('Recipe is not available', style: AppTextStyles.body),
           );
         }
-
-        if (!snapshot.hasData ||
-            snapshot.data!.meals == null ||
-            snapshot.data!.meals!.isEmpty) {
-          return Center(
-            child: Text(
-              'Recipe is not available',
-              style: AppTextStyles.body,
-            ),
-          );
-        }
-
-        final meals = snapshot.data!.meals!;
 
         return SingleChildScrollView(
           child: Column(
             children: [
-              for (int i = 0; i < meals.length; i += 2)
+              for (int i = 0; i < list.length; i += 2)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Row(
                     children: [
-                      Expanded(
-                        child: _recipeCard(
-                          meal: meals[i],
-                        ),
-                      ),
+                      Expanded(child: _recipeCard(context, list[i])),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: i + 1 < meals.length
-                            ? _recipeCard(
-                                meal: meals[i + 1],
-                              )
+                        child: i + 1 < list.length
+                            ? _recipeCard(context, list[i + 1])
                             : const SizedBox(),
                       ),
                     ],
@@ -198,19 +170,20 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _recipeCard({required Meals meal}) {
+  Widget _recipeCard(BuildContext context, Meals meal) {
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DetailScreen(
-              mealId: meal.idMeal!, // nanti buat detail
+        if (meal.idMeal != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DetailScreen(mealId: meal.idMeal!),
             ),
-          ),
-        );
+          );
+        }
       },
       child: Card(
+        color: AppColors.surface,
         clipBehavior: Clip.antiAlias,
         elevation: 2,
         child: Column(
@@ -221,10 +194,14 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 180,
               width: double.infinity,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                height: 180,
+                color: Colors.grey[300],
+                child: const Icon(Icons.broken_image, size: 50),
+              ),
             ),
-
             Container(
-              color: AppColors.recipeCard,
+              color: AppColors.surface,
               width: double.infinity,
               padding: const EdgeInsets.all(8),
               child: Column(
@@ -234,18 +211,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     meal.strMeal ?? '-',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.cardTitle.copyWith(
-                      fontSize: 14,
-                    ),
+                    style: AppTextStyles.cardTitle.copyWith(fontSize: 14),
                   ),
-
                   const SizedBox(height: 4),
-
                   Text(
                     meal.strCategory ?? '-',
-                    style: AppTextStyles.subtitle.copyWith(
-                      fontSize: 12,
-                    ),
+                    style: AppTextStyles.subtitle.copyWith(fontSize: 12),
                   ),
                 ],
               ),
