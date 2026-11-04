@@ -41,4 +41,7 @@ class MealApi {
       throw Exception('Failed to load meals by search');
     }
   }
+
+  //fetch category
+  //fetch meals by category
 }

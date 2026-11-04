@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/bottom_navigation_bar_widget.dart';
+import '../widgets/planner_sheet.dart';
 import '../theme.dart';
 import '../data/recipe_data.dart';
 import '../screens/planner_screen.dart';
@@ -23,91 +24,32 @@ class DetailScreen extends StatelessWidget {
     return recipeDatas.first;
   }
 
-  void _addToPlanner(BuildContext context, RecipeData meal) {
-    final days = [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday',
-    ];
+  Future<void> _addToPlanner(BuildContext context, RecipeData meal) async {
+    final result = await PlannerSheet.show(
+      context,
+      title: 'Add to Planner',
+      confirmLabel: 'Add to Planner',
+    );
 
-    String selectedDay = 'Monday';
+    if (result == null || !context.mounted) return;
 
-    showDialog<String>(
-      context: context,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              backgroundColor: AppColors.background,
-              title: const Text(
-                'Add to Planner',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              content: DropdownButton<String>(
-                value: selectedDay,
-                isExpanded: true,
-                dropdownColor: AppColors.background,
-                items: days.map((day) {
-                  return DropdownMenuItem<String>(
-                    value: day,
-                    child: Text(day),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setDialogState(() {
-                      selectedDay = value;
-                    });
-                  }
-                },
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(dialogContext);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: AppColors.textPrimary,
-                  ),
-                  child: const Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(dialogContext, selectedDay);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.textPrimary,
-                    foregroundColor: AppColors.accent,
-                  ),
-                  child: const Text('Save'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    ).then((day) {
-      if (day == null || !context.mounted) return;
+    plannedRecipes.add(
+      PlannedRecipe(
+        recipeId: meal.id,
+        day: result.day,
+        mealType: result.mealType,
+      ),
+    );
 
-      plannedRecipes.add(
-        PlannedRecipe(
-          recipeId: meal.id,
-          day: day,
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: AppColors.primary,
+        content: Text(
+          'Added recipe to ${result.day}',
+          style: const TextStyle(color: AppColors.onPrimary),
         ),
-      );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Added recipe to $day'),
-        ),
-      );
-    });
+      ),
+    );
   }
 
   @override
@@ -135,11 +77,11 @@ class DetailScreen extends StatelessWidget {
                         return Container(
                           width: double.infinity,
                           height: 300,
-                          color: Colors.grey.shade300,
+                          color: AppColors.divider,
                           child: Icon(
                             Icons.restaurant,
                             size: 60,
-                            color: AppColors.textPrimary,
+                            color: AppColors.textSecondary,
                           ),
                         );
                       },
@@ -178,7 +120,7 @@ class DetailScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Judul resep dan tombol planner
+                          
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
@@ -195,8 +137,8 @@ class DetailScreen extends StatelessWidget {
                               ElevatedButton.icon(
                                 onPressed: () => _addToPlanner(context, meal),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.textPrimary,
-                                  foregroundColor: AppColors.accent,
+                                  backgroundColor: AppColors.primary,   
+                                  foregroundColor: AppColors.onPrimary,
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 10,
                                     vertical: 12,
@@ -213,52 +155,102 @@ class DetailScreen extends StatelessWidget {
                                   size: 18,
                                 ),
                                 label: Text(
-                                  'Add to planner',
+                                  'Add to Planner',
                                   style: AppTextStyles.button.copyWith(
                                     fontSize: 14,
-                                    color: AppColors.accent,
+                                    color: AppColors.onPrimary, 
                                   ),
                                 ),
                               ),
                             ],
                           ),
 
-                          const SizedBox(height: 8),
+                          // const SizedBox(height: 8),
 
                           // Kategori resep
-                          Text(
-                            meal.category,
-                            style: AppTextStyles.subtitle,
+                         
+                          // Container(  
+                          //   padding: const EdgeInsets.only(bottom: 16, top: 16),
+                          //   decoration: BoxDecoration(
+                          //     border: Border.symmetric(
+                          //       horizontal: BorderSide(
+                          //         color: Colors.grey,
+                          //         width: 1,
+                          //       ),
+                          //     ),
+                          //   ),
+                          //   child: Column(
+                          //     crossAxisAlignment: CrossAxisAlignment.start,
+                          //     children: [
+                          //       SizedBox(
+                          //         width: 350,
+                          //         // height: 20,
+                          //         child: Text(
+                          //           meal.category,
+                          //           style: AppTextStyles.subtitle,
+                          //         ),
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                               Text(
+                                    meal.category,
+                                    style: AppTextStyles.subtitle,
+                              ),
+                              
+                              Divider(
+                                height: 20,
+                                color: AppColors.divider,
+                                thickness: 1,
+                              ),
+                            ],
                           ),
 
-                          const SizedBox(height: 24),
+                          // const SizedBox(height: 18),
+                          
 
                           // Ingredients
-                          Text(
-                            'Ingredients',
-                            style: AppTextStyles.cardTitle.copyWith(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          for (final ingredient in meal.ingredients)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
-                              child: Text(
-                                ingredient,
-                                style: AppTextStyles.body.copyWith(
-                                  height: 1.4,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Ingredients',
+                                style: AppTextStyles.cardTitle.copyWith(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ),
+                              const SizedBox(height: 12),
+                              for (final ingredient in meal.ingredients)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 10),
+                                  child: Text(
+                                    ingredient,
+                                    style: AppTextStyles.body.copyWith(
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ),
+                              Divider(
+                                height: 20,
+                                color: AppColors.divider,
+                                thickness: 1,
+                              ),
+                            ],
+                          ),
 
-                          const SizedBox(height: 24),
+                          
 
-                          // Instructions
-                          Text(
+                          // const SizedBox(height: 5),
+
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
                             'Instructions',
                             style: AppTextStyles.cardTitle.copyWith(
                               fontSize: 18,
@@ -273,6 +265,8 @@ class DetailScreen extends StatelessWidget {
                             style: AppTextStyles.body.copyWith(
                               height: 1.5,
                             ),
+                          ),
+                          ],
                           ),
                         ],
                       ),

@@ -36,22 +36,45 @@ class _HomeScreenState extends State<HomeScreen> {
 
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: 
-            Text(
-              'Meal Planner',
-              style: AppTextStyles.heading.copyWith(
-                letterSpacing: 2,
-              )
-              
-            ),
-            backgroundColor: AppColors.primaryLight,
-          
+        title: Text(
+          'Meal Planner',
+          style: AppTextStyles.heading.copyWith(
+            letterSpacing: 2,
+            color: AppColors.background,
+          ),
         ),
+        backgroundColor: AppColors.primary,
+      ),
     
 
       body: Column(
         children: [
-          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            decoration: const BoxDecoration(
+               color: AppColors.primary,
+               borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(25),
+                bottomRight: Radius.circular(25),
+              ),
+            ),
+            padding: const EdgeInsets.fromLTRB(15, 4, 15, 16),
+
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Find Your Next Favorite Meal',
+                  style: AppTextStyles.subtitle.copyWith(
+                    color: AppColors.onPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                  ),
+                ),
+                _searchField(),
+              ],
+            ),
+          ),
 
           Expanded(
             child: Row(
@@ -62,13 +85,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _searchField(),
                       const SizedBox(height: 20),
 
                       Column(
                         children: [
                           Text(
-                          'Find Your Next Favorite Meal',
+                          'Explore',
                           style: AppTextStyles.subtitle.copyWith(
                             color: AppColors.textPrimary,
                             fontWeight: FontWeight.w600,
@@ -104,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
+            color:Colors.black.withOpacity(0.25),
             spreadRadius: 2,
             blurRadius: 8,
           ),
@@ -120,18 +142,16 @@ class _HomeScreenState extends State<HomeScreen> {
         style: AppTextStyles.body,
         decoration: InputDecoration(
           filled: true,
-          fillColor: const Color(0xFFF5F5F5),
+          fillColor: AppColors.surface,
           contentPadding: const EdgeInsets.all(15),
           hintText: 'Search recipes...',
-          hintStyle: AppTextStyles.subtitle.copyWith(
-            color: Colors.grey,
-          ),
+          hintStyle: AppTextStyles.subtitle,
           prefixIcon: const Icon(
             Icons.search,
-            color: Colors.grey,
+            color: AppColors.textSecondary,
           ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(20),
             borderSide: BorderSide.none,
           ),
         ),
@@ -193,6 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
       child: Card(
+        color: AppColors.surface,
         clipBehavior: Clip.antiAlias,
         elevation: 2,
         child: Column(
@@ -206,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
 
             Container(
-              color: AppColors.recipeCard,
+              color: AppColors.surface,
               width: double.infinity,
               padding: const EdgeInsets.all(8),
               child: Column(
